@@ -1,0 +1,3 @@
+C:/Users/Daniel/CLionProjects/newgame-demo/cmake-build-debug-visual-studio/CMakeFiles/newgame_demo.dir
+C:/Users/Daniel/CLionProjects/newgame-demo/cmake-build-debug-visual-studio/CMakeFiles/edit_cache.dir
+C:/Users/Daniel/CLionProjects/newgame-demo/cmake-build-debug-visual-studio/CMakeFiles/rebuild_cache.dir

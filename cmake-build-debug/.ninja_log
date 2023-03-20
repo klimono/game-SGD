@@ -1,0 +1,5 @@
+# ninja log v5
+0	80	7005962889198473	build.ninja	b30966349e248e12
+819	1098	7005959225131305	newgame_demo.exe	f20e3b9f576aac51
+0	659	7005962601201503	CMakeFiles/newgame-demo.dir/main.cpp.obj	c3765af9eb38b184
+2	391	7005963519485510	CMakeFiles/newgame-demo.dir/main.cpp.obj	5d7c9a58960c624c
