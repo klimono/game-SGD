@@ -195,16 +195,17 @@ void asteroid_collision(asteroid_c &asteroid){
 
 void asteroidHIT(asteroid_c &asteroid, bullet_c &bullet){
 
-    double aX = asteroid.position[0];
-    double aY = asteroid.position[1];
 
-    double bX = bullet.position[0];
-    double bY = bullet.position[1];
 
     //PRZYPADEK 1 ĆWIARTKA
     if(asteroid.position[0]>=-400 && asteroid.position[1]>=-400){
-        //if(bX > aX+60)
-           // std::cout << "AX: "<<asteroid1.position[0]<<"\n";
+        if(bullet.position[0] > asteroid.position[0]-90)
+            if(bullet.position[0] < asteroid.position[0]+30)
+                if(bullet.position[1] > asteroid.position[0]-90)
+                    if(bullet.position[1] < asteroid.position[1]){
+                std::cout << "AX: "<<asteroid.position[0]<<"\n";
+        bullet_reset(bullet);
+        asteroid_reset(asteroid);}
 
 
 
@@ -255,9 +256,9 @@ void play_the_game(SDL_Renderer *renderer){
     player_c player = {M_PI*1.5,{-352,-352}};
 
     //inicjacja asteroid
-    asteroid_c asteroid1 = {0, {0,0 }};
+    asteroid_c asteroid1 = {0, {-10,-100 }};
     asteroid1.angle = (asteroid_angle_set(asteroid1));
-    asteroid_c asteroid2 = {0,{-800,0}};
+    asteroid_c asteroid2 = {0,{-100,-10}};
     asteroid2.angle = (asteroid_angle_set(asteroid2));
     asteroid_c asteroid3 = {0,asteroid_spawn()};
     asteroid3.angle = (asteroid_angle_set(asteroid3));
@@ -309,11 +310,12 @@ void play_the_game(SDL_Renderer *renderer){
 
         // TRAFIENIE ASTEROIDY
         asteroidHIT(asteroid1, bullet);
+        asteroidHIT(asteroid2, bullet);
         //asteroidHIT(asteroid2, bullet);
         //asteroidHIT(asteroid3, bullet);
 
 
-        std::cout << "AX: "<<asteroid1.position[0]<<"\n";
+
 
         if (keyboard_state[SDL_SCANCODE_LEFT]) player.angle-=M_PI/75.0;
         if (keyboard_state[SDL_SCANCODE_RIGHT]) player.angle+=M_PI/75.0;
