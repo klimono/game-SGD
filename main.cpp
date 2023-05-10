@@ -11,6 +11,7 @@
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 800;
 bool fly = false;
+const int ASTEROID_WIDTH = 60;
 
 
 std::shared_ptr<SDL_Texture> load_texture(SDL_Renderer *renderer, std::string fname) {
@@ -159,6 +160,75 @@ double asteroid_angle_set(asteroid_c asteroid){
     }
 }
 
+void asteroidDESTROY(asteroid_c &asteroid){
+
+
+}
+
+
+
+void bullet_reset(bullet_c &bullet){
+    fly = false;
+    bullet.position = {-382,-382};
+}
+
+void bullet_colision(bullet_c &bullet){
+    //POZA PLANSZE
+    if ((bullet.position[0] > 18 || bullet.position[1] > 18) ||
+        (bullet.position[0] < -782 || bullet.position[1] < -782)){
+        bullet_reset(bullet);
+    }
+}
+
+void asteroid_reset(asteroid_c &asteroid){
+    asteroid.position=asteroid_spawn();
+    asteroid.angle= asteroid_angle_set(asteroid);
+}
+
+void asteroid_collision(asteroid_c &asteroid){
+    //POZA PLANSZE
+    if((asteroid.position[0] > 60 || asteroid.position[1] > 60) ||
+       (asteroid.position[0] < -800 || asteroid.position[1] < -800)){
+        asteroid_reset(asteroid);
+    }
+}
+
+void asteroidHIT(asteroid_c &asteroid, bullet_c &bullet){
+
+    double aX = asteroid.position[0];
+    double aY = asteroid.position[1];
+
+    double bX = bullet.position[0];
+    double bY = bullet.position[1];
+
+    //PRZYPADEK 1 ĆWIARTKA
+    if(asteroid.position[0]>=-400 && asteroid.position[1]>=-400){
+        //if(bX > aX+60)
+           // std::cout << "AX: "<<asteroid1.position[0]<<"\n";
+
+
+
+
+    }
+
+    //PRZYPADEK 2 ĆWIARTKA
+
+
+
+
+    //PRZYPADEK 3 ĆWIARTKA
+
+
+
+    //PRZYPADEK 4 ĆWIARTKA
+
+}
+
+
+
+
+
+
 void play_the_game(SDL_Renderer *renderer){
     //ładowanie tekstury gracza
     auto player_texture = load_texture(renderer, "ship.bmp");
@@ -185,9 +255,9 @@ void play_the_game(SDL_Renderer *renderer){
     player_c player = {M_PI*1.5,{-352,-352}};
 
     //inicjacja asteroid
-    asteroid_c asteroid1 = {0, asteroid_spawn()};
+    asteroid_c asteroid1 = {0, {0,0 }};
     asteroid1.angle = (asteroid_angle_set(asteroid1));
-    asteroid_c asteroid2 = {0,asteroid_spawn()};
+    asteroid_c asteroid2 = {0,{-800,0}};
     asteroid2.angle = (asteroid_angle_set(asteroid2));
     asteroid_c asteroid3 = {0,asteroid_spawn()};
     asteroid3.angle = (asteroid_angle_set(asteroid3));
@@ -228,26 +298,22 @@ void play_the_game(SDL_Renderer *renderer){
             bullet.position = bullet.position - forward_vec_b*3;
         }
 
-        if ((bullet.position[0] > 18 || bullet.position[1] > 18) ||
-            (bullet.position[0] < -782 || bullet.position[1] < -782)){
-            fly = false;
-            bullet.position = {-382,-382};
-        }
+
+        // KOLIZJE ASTEROID
+        asteroid_collision(asteroid1);
+        asteroid_collision(asteroid2);
+        asteroid_collision(asteroid3);
+
+        // KOLIZJE POCISKU
+        bullet_colision(bullet);
+
+        // TRAFIENIE ASTEROIDY
+        asteroidHIT(asteroid1, bullet);
+        //asteroidHIT(asteroid2, bullet);
+        //asteroidHIT(asteroid3, bullet);
 
 
-        // RESET ASTEROIDA POZA PLANSZĄ
-
-        if((asteroid1.position[0] > 60 || asteroid1.position[1] > 60) ||
-           (asteroid1.position[0] < -800 || asteroid1.position[1] < -800)){
-            asteroid1.position=asteroid_spawn();
-            asteroid1.angle= asteroid_angle_set(asteroid1);
-        }
-
-        // RESET KOLIZJA ASTEROIDY Z POCISKIEM
-
-
-
-
+        std::cout << "AX: "<<asteroid1.position[0]<<"\n";
 
         if (keyboard_state[SDL_SCANCODE_LEFT]) player.angle-=M_PI/75.0;
         if (keyboard_state[SDL_SCANCODE_RIGHT]) player.angle+=M_PI/75.0;
