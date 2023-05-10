@@ -38,9 +38,9 @@
 			[
 				{
 					"directoryIndex" : 0,
-					"id" : "newgame-demo::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-newgame-demo-Debug-9c82deacd973ea0cab5c.json",
-					"name" : "newgame-demo",
+					"id" : "newgame_demo::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-newgame_demo-Debug-ea0d851e74c386980276.json",
+					"name" : "newgame_demo",
 					"projectIndex" : 0
 				}
 			]

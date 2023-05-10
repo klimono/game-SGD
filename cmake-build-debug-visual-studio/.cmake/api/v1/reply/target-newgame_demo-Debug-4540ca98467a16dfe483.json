@@ -29,19 +29,19 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 14,
+				"line" : 20,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 15,
+				"line" : 23,
 				"parent" : 0
 			},
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 13,
+				"line" : 18,
 				"parent" : 0
 			}
 		]
@@ -67,6 +67,10 @@
 				{
 					"backtrace" : 3,
 					"path" : "C:/LibSDL/VC/SDL2_mixer-2.6.3/include"
+				},
+				{
+					"backtrace" : 3,
+					"path" : "C:/LibSDL/VC/SDL2_ttf-2.20.2/include"
 				}
 			],
 			"language" : "CXX",
@@ -110,6 +114,11 @@
 			{
 				"backtrace" : 2,
 				"fragment" : "C:\\LibSDL\\VC\\SDL2_mixer-2.6.3\\lib\\x64\\SDL2_mixer.lib",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "C:\\LibSDL\\VC\\SDL2_ttf-2.20.2\\lib\\x64\\SDL2_ttf.lib",
 				"role" : "libraries"
 			},
 			{

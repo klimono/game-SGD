@@ -51,7 +51,7 @@ build cmake_object_order_depends_target_newgame_demo: phony || CMakeFiles\newgam
 
 build CMakeFiles\newgame_demo.dir\main.cpp.obj: CXX_COMPILER__newgame_demo_Debug C$:\Users\Daniel\CLionProjects\newgame-demo\main.cpp || cmake_object_order_depends_target_newgame_demo
   FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -MDd -std:c++17
-  INCLUDES = -IC:\LibSDL\VC\SDL2-2.26.3\include -IC:\LibSDL\VC\SDL2_mixer-2.6.3\include
+  INCLUDES = -IC:\LibSDL\VC\SDL2-2.26.3\include -IC:\LibSDL\VC\SDL2_mixer-2.6.3\include -IC:\LibSDL\VC\SDL2_ttf-2.20.2\include
   OBJECT_DIR = CMakeFiles\newgame_demo.dir
   OBJECT_FILE_DIR = CMakeFiles\newgame_demo.dir
   TARGET_COMPILE_PDB = CMakeFiles\newgame_demo.dir\
@@ -65,10 +65,10 @@ build CMakeFiles\newgame_demo.dir\main.cpp.obj: CXX_COMPILER__newgame_demo_Debug
 #############################################
 # Link the executable newgame_demo.exe
 
-build newgame_demo.exe: CXX_EXECUTABLE_LINKER__newgame_demo_Debug CMakeFiles\newgame_demo.dir\main.cpp.obj | C$:\LibSDL\VC\SDL2-2.26.3\lib\x64\SDL2.lib C$:\LibSDL\VC\SDL2-2.26.3\lib\x64\SDL2main.lib C$:\LibSDL\VC\SDL2_mixer-2.6.3\lib\x64\SDL2_mixer.lib
+build newgame_demo.exe: CXX_EXECUTABLE_LINKER__newgame_demo_Debug CMakeFiles\newgame_demo.dir\main.cpp.obj | C$:\LibSDL\VC\SDL2-2.26.3\lib\x64\SDL2.lib C$:\LibSDL\VC\SDL2-2.26.3\lib\x64\SDL2main.lib C$:\LibSDL\VC\SDL2_mixer-2.6.3\lib\x64\SDL2_mixer.lib C$:\LibSDL\VC\SDL2_ttf-2.20.2\lib\x64\SDL2_ttf.lib
   FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -MDd
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
-  LINK_LIBRARIES = C:\LibSDL\VC\SDL2-2.26.3\lib\x64\SDL2.lib  C:\LibSDL\VC\SDL2-2.26.3\lib\x64\SDL2main.lib  C:\LibSDL\VC\SDL2_mixer-2.6.3\lib\x64\SDL2_mixer.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
+  LINK_LIBRARIES = C:\LibSDL\VC\SDL2-2.26.3\lib\x64\SDL2.lib  C:\LibSDL\VC\SDL2-2.26.3\lib\x64\SDL2main.lib  C:\LibSDL\VC\SDL2_mixer-2.6.3\lib\x64\SDL2_mixer.lib  C:\LibSDL\VC\SDL2_ttf-2.20.2\lib\x64\SDL2_ttf.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = CMakeFiles\newgame_demo.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
