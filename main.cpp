@@ -10,10 +10,7 @@
 //screen
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 800;
-
-//asteroid
-const int PADDLE_WIDTH = 20;
-const int PADDLE_HEIGHT = 100;
+bool fly = false;
 
 
 std::shared_ptr<SDL_Texture> load_texture(SDL_Renderer *renderer, std::string fname) {
@@ -58,6 +55,15 @@ vec2d operator-(vec2d a, vec2d b){
     return {a[0]-b[0],a[1]-b[1]};
 }
 
+vec2d operator/(vec2d a, int i){
+    return {a[0]/i,a[1]/i};
+}
+
+vec2d operator*(vec2d a, int i){
+    return {a[0]*i,a[1]*i};
+}
+
+// KLASY OBIEKTÓW
 class player_c {
 public:
     double angle;
@@ -98,8 +104,8 @@ double asteroid_angle(asteroid_c asteroid){
     int x1, x2, y1, y2;
     x1 = asteroid.position[0];
     y1 = asteroid.position[1];
-    x2 = -400;
-    y2 = -400;
+    x2 = -340;
+    y2 = -340;
     height_distance = y2-y1;
     euclides_distance = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
     //angle = height_distance/euclides_distance;
@@ -111,31 +117,31 @@ double asteroid_angle(asteroid_c asteroid){
 //generatoor koordynatów asteroid
 vec2d asteroid_spawn_XY (){
     vec2d position;
-    int x = -random(-900, 100);
-    int y = -random(-900, 100);
+    int x = random(-800, 0);
+    int y = random(-800, 0);
     position[0] = x;
     position[1] = y;
     return position;
 }
 
-//przekazanie gotowych koordynatów, sprawdzanie czy pasują
+//stworzenie i sprawdzenie koordynatów
 vec2d asteroid_spawn(){
     vec2d position = asteroid_spawn_XY();
 
-    std::cout<<position[0]<<" "<<position[1]<<"\n";
+    std::cout<<"BAD: "<<position[0]<<" "<<position[1]<<"\n";
 
     bool is_position_OK = 0;
-    while(!is_position_OK){
-        if((position[1] > -000)
-           || (position[0] < -800)
-           || (position[0] > -00)
-           || (position[1] < -800)){
-            is_position_OK = 1;
-            std::cout<<position[0]<<" "<<position[1]<<"\n";
+    while(true){
+        if(   (position[0] > -25)
+           || (position[0] < -775)
+           || (position[1] > -25)
+           || (position[1] < -775)){
+            std::cout<<"GOOD: "<<position[0]<<" "<<position[1]<<"\n";
+            return position;
         }
-        position = asteroid_spawn_XY();
+        else position = asteroid_spawn_XY();
     }
-    return position;
+
 }
 
 double asteroid_angle_set(asteroid_c asteroid){
@@ -153,7 +159,6 @@ double asteroid_angle_set(asteroid_c asteroid){
     }
 }
 
-
 void play_the_game(SDL_Renderer *renderer){
     //ładowanie tekstury gracza
     auto player_texture = load_texture(renderer, "ship.bmp");
@@ -164,7 +169,10 @@ void play_the_game(SDL_Renderer *renderer){
     //ładowanie tekstury pocisku
     auto bullet_texture = load_texture(renderer, "bullet.bmp");
 
-    //prostokat/wielkosc obiektu gracza
+    //ładowanie tekstury tła
+    auto background_texture = load_texture(renderer, "background.bmp");
+
+    //obiekt gracza
     SDL_Rect player_rect = get_texture_rect(player_texture);
 
     //obiekt asteroid
@@ -173,19 +181,19 @@ void play_the_game(SDL_Renderer *renderer){
     //obiakt pocisku
     SDL_Rect bullet_rect = get_texture_rect(bullet_texture);
 
+    //inicjacja gracza
+    player_c player = {M_PI*1.5,{-352,-352}};
 
-    player_c player = {M_PI*1.5,{-400,-400}};
+    //inicjacja asteroid
     asteroid_c asteroid1 = {0, asteroid_spawn()};
-
-    std::cout<<asteroid_angle(asteroid1);
     asteroid1.angle = (asteroid_angle_set(asteroid1));
-
-
-
-    //asteroid_c asteroid1 = {0,asteroid_spawn()};
     asteroid_c asteroid2 = {0,asteroid_spawn()};
+    asteroid2.angle = (asteroid_angle_set(asteroid2));
     asteroid_c asteroid3 = {0,asteroid_spawn()};
-    bullet_c bullet = {0, {-352,-352.0}};
+    asteroid3.angle = (asteroid_angle_set(asteroid3));
+
+    //inicjacja pocisku
+    bullet_c bullet = {M_PI*1.5, {-382,-382}};
 
     bool gaming = true;
     while(gaming){
@@ -204,42 +212,90 @@ void play_the_game(SDL_Renderer *renderer){
 
         auto *keyboard_state =  SDL_GetKeyboardState(nullptr);
 
-        //STRZELA
-        if (keyboard_state[SDL_SCANCODE_UP]) {
-            //vec2d forward_vec = angle_to_vector(player.angle);
-            //player.position = player.position - forward_vec;
+
+
+
+        // STRZELANIE
+        if (!fly) {
+            if (keyboard_state[SDL_SCANCODE_SPACE]) {
+                bullet.angle = player.angle;
+                fly = true;
+            }
         }
 
-        if (keyboard_state[SDL_SCANCODE_DOWN]) {
-            //vec2d forward_vec = angle_to_vector(player.angle);
-            //player.position = player.position + forward_vec;
+        if (fly){
+            vec2d forward_vec_b = angle_to_vector(bullet.angle);
+            bullet.position = bullet.position - forward_vec_b*3;
         }
+
+        if ((bullet.position[0] > 18 || bullet.position[1] > 18) ||
+            (bullet.position[0] < -782 || bullet.position[1] < -782)){
+            fly = false;
+            bullet.position = {-382,-382};
+        }
+
+
+        // RESET ASTEROIDA POZA PLANSZĄ
+
+        if((asteroid1.position[0] > 60 || asteroid1.position[1] > 60) ||
+           (asteroid1.position[0] < -800 || asteroid1.position[1] < -800)){
+            asteroid1.position=asteroid_spawn();
+            asteroid1.angle= asteroid_angle_set(asteroid1);
+        }
+
+        // RESET KOLIZJA ASTEROIDY Z POCISKIEM
+
+
+
+
+
         if (keyboard_state[SDL_SCANCODE_LEFT]) player.angle-=M_PI/75.0;
         if (keyboard_state[SDL_SCANCODE_RIGHT]) player.angle+=M_PI/75.0;
 
 
 
 
-        vec2d forward_vec = angle_to_vector(asteroid1.angle);
-        //asteroid1.angle = -M_PI/asteroid_angle(asteroid1,player);
+        //poruszanie się asteroid
+        vec2d forward_vec_a1 = angle_to_vector(asteroid1.angle);
+        asteroid1.position = asteroid1.position - forward_vec_a1/2;
 
-        asteroid1.position = asteroid1.position - forward_vec;
+        vec2d forward_vec_a2 = angle_to_vector(asteroid2.angle);
+        asteroid2.position = asteroid2.position - forward_vec_a2/2;
 
-        SDL_SetRenderDrawColor(renderer,10,40,128,255);
-        //SDL_RenderDrawLine(renderer, 0,0, 640,240);
-        //SDL_RenderCopy(renderer, player_texture.get(), nullptr, &player_rect);
+        vec2d forward_vec_a3 = angle_to_vector(asteroid3.angle);
+        asteroid3.position = asteroid3.position - forward_vec_a3/2;
 
-        auto a_rect = asteroid_rect;
+
+        //SDL_SetRenderDrawColor(renderer,10,40,128,255);
+
+
+
+
+
+        //środek obiektów
         auto p_rect = player_rect;
-
         p_rect.x -= player.position[0] - p_rect.w / 2;
         p_rect.y -= player.position[1] - p_rect.h / 2;
 
-        a_rect.x -= asteroid1.position[0] - p_rect.w / 2;
-        a_rect.y -= asteroid1.position[1] - p_rect.h / 2;
+        auto a1_rect = asteroid_rect;
+        a1_rect.x -= asteroid1.position[0] - a1_rect.w / 2;
+        a1_rect.y -= asteroid1.position[1] - a1_rect.h / 2;
+
+        auto a2_rect = asteroid_rect;
+        a2_rect.x -= asteroid2.position[0] - a2_rect.w / 2;
+        a2_rect.y -= asteroid2.position[1] - a2_rect.h / 2;
+
+        auto a3_rect = asteroid_rect;
+        a3_rect.x -= asteroid3.position[0] - a3_rect.w / 2;
+        a3_rect.y -= asteroid3.position[1] - a3_rect.h / 2;
+
+        auto b_rect = bullet_rect;
+        b_rect.x -= bullet.position[0] - b_rect.w / 2;
+        b_rect.y -= bullet.position[1] - b_rect.h / 2;
 
 
-        std::cout<<asteroid_angle(asteroid1);
+        // render kosmosu
+        SDL_RenderCopy(renderer, background_texture.get(), nullptr, nullptr);
 
         // render gracza
         SDL_RenderCopyEx(renderer, player_texture.get(),
@@ -248,10 +304,22 @@ void play_the_game(SDL_Renderer *renderer){
 
         // render asteroidy
         SDL_RenderCopyEx(renderer, asteroid_texture.get(),
-                         nullptr, &a_rect, 180 * asteroid1.angle / M_PI,
+                         nullptr, &a1_rect, 180 * asteroid1.angle / M_PI,
+                         nullptr, SDL_FLIP_NONE);
+
+        SDL_RenderCopyEx(renderer, asteroid_texture.get(),
+                         nullptr, &a2_rect, 180 * asteroid2.angle / M_PI,
+                         nullptr, SDL_FLIP_NONE);
+
+        SDL_RenderCopyEx(renderer, asteroid_texture.get(),
+                         nullptr, &a3_rect, 180 * asteroid3.angle / M_PI,
                          nullptr, SDL_FLIP_NONE);
 
 
+        // render pocisku
+        SDL_RenderCopyEx(renderer, bullet_texture.get(),
+                         nullptr, &b_rect, 180 * bullet.angle / M_PI,
+                         nullptr, SDL_FLIP_NONE);
 
         SDL_RenderPresent(renderer);
         SDL_RenderClear(renderer);
@@ -264,6 +332,8 @@ vec2d angle_to_vector(double angle) {
 }
 
 int main() {
+
+    srand((unsigned)time(NULL));
     SDL_Init(SDL_INIT_EVERYTHING);
 /*
     int help = 0;
