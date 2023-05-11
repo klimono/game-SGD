@@ -129,7 +129,6 @@ vec2d asteroid_spawn_XY (){
 vec2d asteroid_spawn(){
     vec2d position = asteroid_spawn_XY();
 
-    std::cout<<"BAD: "<<position[0]<<" "<<position[1]<<"\n";
 
     bool is_position_OK = 0;
     while(true){
@@ -137,7 +136,6 @@ vec2d asteroid_spawn(){
            || (position[0] < -775)
            || (position[1] > -25)
            || (position[1] < -775)){
-            std::cout<<"GOOD: "<<position[0]<<" "<<position[1]<<"\n";
             return position;
         }
         else position = asteroid_spawn_XY();
@@ -161,12 +159,12 @@ double asteroid_angle_set(asteroid_c asteroid){
 }
 
 void asteroidDESTROY(asteroid_c &asteroid){
-
+    std::cout<<"HIT"<<"\n";
 
 }
 
 
-
+    //RESET POCISKU
 void bullet_reset(bullet_c &bullet){
     fly = false;
     bullet.position = {-382,-382};
@@ -180,13 +178,14 @@ void bullet_colision(bullet_c &bullet){
     }
 }
 
+    //RESET ASTEROIDY
 void asteroid_reset(asteroid_c &asteroid){
     asteroid.position=asteroid_spawn();
     asteroid.angle= asteroid_angle_set(asteroid);
 }
 
-void asteroid_collision(asteroid_c &asteroid){
     //POZA PLANSZE
+void asteroid_collision(asteroid_c &asteroid){
     if((asteroid.position[0] > 60 || asteroid.position[1] > 60) ||
        (asteroid.position[0] < -800 || asteroid.position[1] < -800)){
         asteroid_reset(asteroid);
@@ -194,38 +193,50 @@ void asteroid_collision(asteroid_c &asteroid){
 }
 
 void asteroidHIT(asteroid_c &asteroid, bullet_c &bullet){
-
-
-
     //PRZYPADEK 1 ĆWIARTKA
     if(asteroid.position[0]>=-400 && asteroid.position[1]>=-400){
-        if(bullet.position[0] > asteroid.position[0]-90)
-            if(bullet.position[0] < asteroid.position[0]+30)
-                if(bullet.position[1] > asteroid.position[0]-90)
-                    if(bullet.position[1] < asteroid.position[1]){
-                std::cout << "AX: "<<asteroid.position[0]<<"\n";
-        bullet_reset(bullet);
-        asteroid_reset(asteroid);}
-
-
-
-
+        if(bullet.position[0]>asteroid.position[0]-60)
+            if(bullet.position[0]<asteroid.position[0])
+                if(bullet.position[1]>asteroid.position[1]-60)
+                    if(bullet.position[1]<asteroid.position[1]){
+                        bullet_reset(bullet);
+                        asteroid_reset(asteroid);
+                        asteroidDESTROY(asteroid);}
     }
 
     //PRZYPADEK 2 ĆWIARTKA
-
-
-
+    if(asteroid.position[0]<=-400 && asteroid.position[1]>=-400){
+        if(bullet.position[0]+24>asteroid.position[0]-60)
+            if(bullet.position[0]+24<asteroid.position[0])
+                if(bullet.position[1]>asteroid.position[1]-60)
+                    if(bullet.position[1]<asteroid.position[1]){
+                        bullet_reset(bullet);
+                        asteroid_reset(asteroid);
+                        asteroidDESTROY(asteroid);}
+    }
 
     //PRZYPADEK 3 ĆWIARTKA
-
-
+    if(asteroid.position[0]<=-400 && asteroid.position[1]<=-400){
+        if(bullet.position[0]+24<asteroid.position[0])
+            if(bullet.position[0]+24>asteroid.position[0]-60)
+                if(bullet.position[1]+24<asteroid.position[1])
+                    if(bullet.position[1]+24>asteroid.position[1]-60){
+                        bullet_reset(bullet);
+                        asteroid_reset(asteroid);
+                        asteroidDESTROY(asteroid);}
+    }
 
     //PRZYPADEK 4 ĆWIARTKA
-
+    if(asteroid.position[0]>=-400 && asteroid.position[1]<=-400){
+        if(bullet.position[0]>asteroid.position[0]-60)
+            if(bullet.position[0]<asteroid.position[0])
+                if(bullet.position[1]<asteroid.position[1])
+                    if(bullet.position[1]>asteroid.position[1]-60){
+                        bullet_reset(bullet);
+                        asteroid_reset(asteroid);
+                        asteroidDESTROY(asteroid);}
+    }
 }
-
-
 
 
 
@@ -258,7 +269,7 @@ void play_the_game(SDL_Renderer *renderer){
     //inicjacja asteroid
     asteroid_c asteroid1 = {0, {-10,-100 }};
     asteroid1.angle = (asteroid_angle_set(asteroid1));
-    asteroid_c asteroid2 = {0,{-100,-10}};
+    asteroid_c asteroid2 = {0,{-100,-700}};
     asteroid2.angle = (asteroid_angle_set(asteroid2));
     asteroid_c asteroid3 = {0,asteroid_spawn()};
     asteroid3.angle = (asteroid_angle_set(asteroid3));
@@ -311,8 +322,7 @@ void play_the_game(SDL_Renderer *renderer){
         // TRAFIENIE ASTEROIDY
         asteroidHIT(asteroid1, bullet);
         asteroidHIT(asteroid2, bullet);
-        //asteroidHIT(asteroid2, bullet);
-        //asteroidHIT(asteroid3, bullet);
+        asteroidHIT(asteroid3, bullet);
 
 
 
