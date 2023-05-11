@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(SDL2_INCLUDE_DIR C:/LibSDL/VC/SDL2-2.26.3/include)
 set(SDL2_LIB_DIR C:/LibSDL/VC/SDL2-2.26.3/lib/x64)
 
-set(SDL2MIXER_INCLUDE_DIR "C:\\LibSDL\\VC\\SDL2_mixer-2.6.3\\include")
-set(SDL2MIXER_LIB_DIR "C:\\LibSDL\\VC\\SDL2_mixer-2.6.3\\lib\\x64")
+set(SDL2MIXER_INCLUDE_DIR "C:/LibSDL/VC/SDL2_mixer-2.6.3/include")
+set(SDL2MIXER_LIB_DIR "C:/LibSDL/VC/SDL2_mixer-2.6.3/lib/x64")
 
 set(SDL2TTF_INCLUDE_DIR C:/LibSDL/VC/SDL2_ttf-2.20.2/include)
 set(SDL2TTF_LIB_DIR C:/LibSDL/VC/SDL2_ttf-2.20.2/lib/x64)

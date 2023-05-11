@@ -6,13 +6,23 @@
 #include <memory>
 #include <array>
 #include <cmath>
+#include <string>
 
-//screen
+
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 800;
-bool fly = false;
+bool menu = true;
 bool game_over = false;
+bool fly = false;
 int score = 0;
+TTF_Font* font;
+SDL_Color textColor = { 255, 255, 255, 255 };
+
+Mix_Chunk* asteroid_explosion;
+Mix_Chunk* player_explosion;
+Mix_Chunk* shoot;
+Mix_Chunk* space_sound;
+
 
 std::shared_ptr<SDL_Texture> load_texture(SDL_Renderer *renderer, std::string fname) {
     SDL_Surface *bmp = SDL_LoadBMP(("images/" + fname).c_str());
@@ -155,9 +165,10 @@ double asteroid_angle_set(asteroid_c asteroid){
 
 void asteroidDESTROY(asteroid_c &asteroid){
     std::cout<<"HIT"<<"\n";
-
+    score++;
     //wybuchy
     //dźwięki
+    Mix_PlayChannel(-1, asteroid_explosion, 0);
 
 }
 
@@ -236,8 +247,10 @@ void asteroidHIT(asteroid_c &asteroid, bullet_c &bullet){
     }
 }
 
-void gameOVER(){
+void gameOVER(asteroid_c &asteroid1){
     game_over = true;
+    asteroid_reset(asteroid1);
+    Mix_PlayChannel(-1, player_explosion, 0);
 }
 
 void playerHIT(asteroid_c &asteroid, player_c &player){
@@ -245,19 +258,19 @@ void playerHIT(asteroid_c &asteroid, player_c &player){
     if(asteroid.position[0]>=-400 && asteroid.position[1]>=-400){
         if(asteroid.position[0]-60 < -360)
             if(asteroid.position[1]-60 <-360)
-                gameOVER();
+                gameOVER(asteroid);
     }
     //PRZYPADEK 2 ĆWIARTKA
     if(asteroid.position[0]<=-400 && asteroid.position[1]>=-400){
         if(asteroid.position[0] > -360)
             if(asteroid.position[1] <-360)
-                gameOVER();
+                gameOVER(asteroid);
     }
     //PRZYPADEK 3 ĆWIARTKA
     if(asteroid.position[0]<=-400 && asteroid.position[1]<=-400){
         if(asteroid.position[0] > -360)
             if(asteroid.position[1] <-360)
-                gameOVER();
+                gameOVER(asteroid);
     }
 }
 
@@ -273,6 +286,9 @@ void play_the_game(SDL_Renderer *renderer){
 
     //ładowanie tekstury pocisku
     auto bullet_texture = load_texture(renderer, "bullet.bmp");
+
+    //ładowanie tekstury menu
+    auto menu_texture = load_texture(renderer, "menu.bmp");
 
     //ładowanie tekstury tła
     auto background_texture = load_texture(renderer, "background.bmp");
@@ -303,114 +319,203 @@ void play_the_game(SDL_Renderer *renderer){
     //inicjacja pocisku
     bullet_c bullet = {M_PI*1.5, {-382,-382}};
 
+    //inicjacja czcionek
+    TTF_Init();
 
+    //inicjacja mixera
+    Mix_Init(MIX_INIT_MP3);
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
 
+    //ładowanie dźwięków
+
+    asteroid_explosion = Mix_LoadWAV("sounds/asteroid_explosion.mp3");
+    player_explosion = Mix_LoadWAV("sounds/player_explosion.mp3");
+    shoot = Mix_LoadWAV("sounds/shoot.mp3");
+    space_sound = Mix_LoadWAV("sounds/space_sound.mp3");
 
     bool gaming = true;
+    Mix_PlayChannel(0, space_sound, -1);
     while(gaming){
-        SDL_Event e;
-        while(SDL_PollEvent(&e) != 0){
-            switch (e.type) {
-                case SDL_QUIT:
-                    gaming = false;
-                    break;
-                case SDL_KEYDOWN:
-                    if(e.key.keysym.sym == SDLK_q) gaming = false;
-                    break;
+
+        if(menu){
+            auto *keyboard_state = SDL_GetKeyboardState(nullptr);
+            SDL_Event e;
+            while (SDL_PollEvent(&e) != 0) {
+                switch (e.type) {
+                    case SDL_QUIT:
+                        gaming = false;
+                        break;
+                    case SDL_KEYDOWN:
+                        if (e.key.keysym.sym == SDLK_q)
+                            gaming = false;
+                        break;
+                }
             }
-        }
-        auto *keyboard_state =  SDL_GetKeyboardState(nullptr);
 
-        //strzelanie
-        if (!fly) {
-            if (keyboard_state[SDL_SCANCODE_SPACE]) {
-                bullet.angle = player.angle;
-                fly = true;
+            if (keyboard_state[SDL_SCANCODE_SPACE]){
+                menu = false;
+                SDL_Delay(100);
             }
+            SDL_RenderCopy(renderer, menu_texture.get(), nullptr, nullptr);
+
         }
 
-        if (fly){
-            vec2d forward_vec_b = angle_to_vector(bullet.angle);
-            bullet.position = bullet.position - forward_vec_b*3;
-        }
 
-        //kolizje asteroid
-        asteroid_collision(asteroid1);
-        asteroid_collision(asteroid2);
-        asteroid_collision(asteroid3);
+        if(!menu) {
 
-        //kolizje pocisku
-        bullet_colision(bullet);
+            font = TTF_OpenFont("font/PixelIntv.ttf", 40);
 
-        //trafienie pociskiem w asteroidy
-        asteroidHIT(asteroid1, bullet);
-        asteroidHIT(asteroid2, bullet);
-        asteroidHIT(asteroid3, bullet);
+            SDL_Event e;
+            while (SDL_PollEvent(&e) != 0) {
+                switch (e.type) {
+                    case SDL_QUIT:
+                        gaming = false;
+                        break;
+                    case SDL_KEYDOWN:
+                        if (e.key.keysym.sym == SDLK_q) gaming = false;
+                        break;
+                }
+            }
+            auto *keyboard_state = SDL_GetKeyboardState(nullptr);
 
-        if (keyboard_state[SDL_SCANCODE_LEFT]) player.angle-=M_PI/75.0;
-        if (keyboard_state[SDL_SCANCODE_RIGHT]) player.angle+=M_PI/75.0;
+            //strzelanie
+            if (!fly && !game_over) {
+                if (keyboard_state[SDL_SCANCODE_SPACE]) {
+                    bullet.angle = player.angle;
+                    fly = true;
+                    Mix_PlayChannel(-1, shoot, 0);
+                }
+            }
 
-        //poruszanie się asteroid
-        vec2d forward_vec_a1 = angle_to_vector(asteroid1.angle);
-        asteroid1.position = asteroid1.position - forward_vec_a1/2;
+            if (fly && !game_over) {
+                vec2d forward_vec_b = angle_to_vector(bullet.angle);
+                bullet.position = bullet.position - forward_vec_b * 3;
+            }
 
-        vec2d forward_vec_a2 = angle_to_vector(asteroid2.angle);
-        asteroid2.position = asteroid2.position - forward_vec_a2/2;
+            //kolizje asteroid
+            asteroid_collision(asteroid1);
+            asteroid_collision(asteroid2);
+            asteroid_collision(asteroid3);
 
-        vec2d forward_vec_a3 = angle_to_vector(asteroid3.angle);
-        asteroid3.position = asteroid3.position - forward_vec_a3/2;
+            //kolizje pocisku
+            bullet_colision(bullet);
 
-        //trafienie asteroid w gracza
-        playerHIT(asteroid1, player);
-        playerHIT(asteroid2, player);
-        playerHIT(asteroid3, player);
+            //trafienie pociskiem w asteroidy
+            asteroidHIT(asteroid1, bullet);
+            asteroidHIT(asteroid2, bullet);
+            asteroidHIT(asteroid3, bullet);
 
-        //środek obiektów
-        auto p_rect = player_rect;
-        p_rect.x -= player.position[0] - p_rect.w / 2;
-        p_rect.y -= player.position[1] - p_rect.h / 2;
+            if (keyboard_state[SDL_SCANCODE_LEFT]) player.angle -= M_PI / 75.0;
+            if (keyboard_state[SDL_SCANCODE_RIGHT]) player.angle += M_PI / 75.0;
 
-        auto a1_rect = asteroid_rect;
-        a1_rect.x -= asteroid1.position[0] - a1_rect.w / 2;
-        a1_rect.y -= asteroid1.position[1] - a1_rect.h / 2;
+            if (!game_over) {
+                //poruszanie się asteroid
+                vec2d forward_vec_a1 = angle_to_vector(asteroid1.angle);
+                asteroid1.position = asteroid1.position - forward_vec_a1 / 2;
 
-        auto a2_rect = asteroid_rect;
-        a2_rect.x -= asteroid2.position[0] - a2_rect.w / 2;
-        a2_rect.y -= asteroid2.position[1] - a2_rect.h / 2;
+                vec2d forward_vec_a2 = angle_to_vector(asteroid2.angle);
+                asteroid2.position = asteroid2.position - forward_vec_a2 / 2;
 
-        auto a3_rect = asteroid_rect;
-        a3_rect.x -= asteroid3.position[0] - a3_rect.w / 2;
-        a3_rect.y -= asteroid3.position[1] - a3_rect.h / 2;
+                vec2d forward_vec_a3 = angle_to_vector(asteroid3.angle);
+                asteroid3.position = asteroid3.position - forward_vec_a3 / 2;
+            }
 
-        auto b_rect = bullet_rect;
-        b_rect.x -= bullet.position[0] - b_rect.w / 2;
-        b_rect.y -= bullet.position[1] - b_rect.h / 2;
+            //trafienie asteroid w gracza
+            playerHIT(asteroid1, player);
+            playerHIT(asteroid2, player);
+            playerHIT(asteroid3, player);
 
-        if(!game_over) {
-            // render kosmosu
-            SDL_RenderCopy(renderer, background_texture.get(), nullptr, nullptr);
+            //środek obiektów
+            auto p_rect = player_rect;
+            p_rect.x -= player.position[0] - p_rect.w / 2;
+            p_rect.y -= player.position[1] - p_rect.h / 2;
 
-            SDL_RenderCopyEx(renderer, player_texture.get(),
-                             nullptr, &p_rect, 180 * player.angle / M_PI,
-                             nullptr, SDL_FLIP_NONE);
+            auto a1_rect = asteroid_rect;
+            a1_rect.x -= asteroid1.position[0] - a1_rect.w / 2;
+            a1_rect.y -= asteroid1.position[1] - a1_rect.h / 2;
 
-            SDL_RenderCopyEx(renderer, asteroid_texture.get(),
-                             nullptr, &a1_rect, 180 * asteroid1.angle / M_PI,
-                             nullptr, SDL_FLIP_NONE);
+            auto a2_rect = asteroid_rect;
+            a2_rect.x -= asteroid2.position[0] - a2_rect.w / 2;
+            a2_rect.y -= asteroid2.position[1] - a2_rect.h / 2;
 
-            SDL_RenderCopyEx(renderer, asteroid_texture.get(),
-                             nullptr, &a2_rect, 180 * asteroid2.angle / M_PI,
-                             nullptr, SDL_FLIP_NONE);
+            auto a3_rect = asteroid_rect;
+            a3_rect.x -= asteroid3.position[0] - a3_rect.w / 2;
+            a3_rect.y -= asteroid3.position[1] - a3_rect.h / 2;
 
-            SDL_RenderCopyEx(renderer, asteroid_texture.get(),
-                             nullptr, &a3_rect, 180 * asteroid3.angle / M_PI,
-                             nullptr, SDL_FLIP_NONE);
+            auto b_rect = bullet_rect;
+            b_rect.x -= bullet.position[0] - b_rect.w / 2;
+            b_rect.y -= bullet.position[1] - b_rect.h / 2;
 
-            SDL_RenderCopyEx(renderer, bullet_texture.get(),
-                             nullptr, &b_rect, 180 * bullet.angle / M_PI,
-                             nullptr, SDL_FLIP_NONE);
-            }else if(game_over){
-            SDL_RenderCopy(renderer, game_over_texture.get(), nullptr, nullptr);
+
+            //wymiana punktów
+            if (score >= 10) {
+                if (keyboard_state[SDL_SCANCODE_X]) {
+                    asteroid_reset(asteroid1);
+                    asteroid_reset(asteroid2);
+                    asteroid_reset(asteroid3);
+                    asteroidDESTROY(asteroid1);
+                    asteroidDESTROY(asteroid2);
+                    asteroidDESTROY(asteroid3);
+                    score -= 13;
+                    SDL_Delay(100);
+                }
+            }
+            std::string scoreStr = std::to_string(score);
+
+            if (!game_over) {
+                // render kosmosu
+                SDL_RenderCopy(renderer, background_texture.get(), nullptr, nullptr);
+
+                SDL_RenderCopyEx(renderer, bullet_texture.get(),
+                                 nullptr, &b_rect, 180 * bullet.angle / M_PI,
+                                 nullptr, SDL_FLIP_NONE);
+
+                SDL_RenderCopyEx(renderer, player_texture.get(),
+                                 nullptr, &p_rect, 180 * player.angle / M_PI,
+                                 nullptr, SDL_FLIP_NONE);
+
+                SDL_RenderCopyEx(renderer, asteroid_texture.get(),
+                                 nullptr, &a1_rect, 180 * asteroid1.angle / M_PI,
+                                 nullptr, SDL_FLIP_NONE);
+
+                SDL_RenderCopyEx(renderer, asteroid_texture.get(),
+                                 nullptr, &a2_rect, 180 * asteroid2.angle / M_PI,
+                                 nullptr, SDL_FLIP_NONE);
+
+                SDL_RenderCopyEx(renderer, asteroid_texture.get(),
+                                 nullptr, &a3_rect, 180 * asteroid3.angle / M_PI,
+                                 nullptr, SDL_FLIP_NONE);
+
+
+                SDL_Surface *scoreSurface = TTF_RenderText_Solid(font, scoreStr.c_str(), textColor);
+                SDL_Texture *scoreTexture = SDL_CreateTextureFromSurface(renderer, scoreSurface);
+
+                SDL_Rect scoreRect = {(WINDOW_WIDTH / 2) - 10, 10, scoreSurface->w, scoreSurface->h};
+
+                SDL_RenderCopy(renderer, scoreTexture, NULL, &scoreRect);
+
+            } else if (game_over) {
+
+                SDL_RenderCopy(renderer, game_over_texture.get(), nullptr, nullptr);
+                std::string gameOverStr = "GAME OVER";
+
+                std::string yourScore = "YOUR SCORE: ";
+
+                SDL_Surface *gameOverSurface = TTF_RenderText_Solid(font, gameOverStr.c_str(), textColor);
+                SDL_Texture *gameOverTexture = SDL_CreateTextureFromSurface(renderer, gameOverSurface);
+                SDL_Rect gameOverRect = {(WINDOW_WIDTH / 2) - 122, 260, gameOverSurface->w, gameOverSurface->h};
+                SDL_RenderCopy(renderer, gameOverTexture, NULL, &gameOverRect);
+
+                SDL_Surface *yourScoreSurface = TTF_RenderText_Solid(font, yourScore.c_str(), textColor);
+                SDL_Texture *yourScoreTexture = SDL_CreateTextureFromSurface(renderer, yourScoreSurface);
+                SDL_Rect yourScoreRect = {(WINDOW_WIDTH / 2) - 162, 360, yourScoreSurface->w, yourScoreSurface->h};
+                SDL_RenderCopy(renderer, yourScoreTexture, NULL, &yourScoreRect);
+
+                SDL_Surface *scoreSurface = TTF_RenderText_Solid(font, scoreStr.c_str(), textColor);
+                SDL_Texture *scoreTexture = SDL_CreateTextureFromSurface(renderer, scoreSurface);
+                SDL_Rect scoreRect = {(WINDOW_WIDTH / 2) + 137, 360, scoreSurface->w, scoreSurface->h};
+                SDL_RenderCopy(renderer, scoreTexture, NULL, &scoreRect);
+            }
         }
 
         SDL_RenderPresent(renderer);
