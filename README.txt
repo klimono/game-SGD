@@ -16,8 +16,8 @@ https://freesound.org/people/runningmind/sounds/387866/
 player_explosion.mp3
 https://freesound.org/people/ProjectsU012/sounds/341701/
 
-Graphics:
-Julia Sobasz ;] <3
+fire.mp3
+https://freesound.org/people/OwlStorm/sounds/404754/
 
 
 
