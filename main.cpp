@@ -15,6 +15,8 @@ bool menu = true;
 bool player_fly = false;
 bool game_over = false;
 bool fly = false;
+bool left = false;
+bool right = false;
 int score = 0;
 int fire_time = 0;
 TTF_Font* font;
@@ -24,6 +26,7 @@ Mix_Chunk* player_explosion;
 Mix_Chunk* shoot;
 Mix_Chunk* space_sound;
 Mix_Chunk* fire;
+Mix_Chunk* side_engine;
 
 
 std::shared_ptr<SDL_Texture> load_texture(SDL_Renderer *renderer, std::string fname) {
@@ -251,6 +254,8 @@ void play_the_game(SDL_Renderer *renderer){
 
     //ładowanie tekstury ognia
     auto fire_texture = load_texture(renderer, "fire.bmp");
+    auto fire_left = load_texture(renderer, "left.bmp");
+    auto fire_right = load_texture(renderer, "right.bmp");
 
     //ładowanie tekstury asteroidy
     auto asteroid_texture = load_texture(renderer, "asteroid.bmp");
@@ -304,6 +309,7 @@ void play_the_game(SDL_Renderer *renderer){
     shoot = Mix_LoadWAV("sounds/shoot.mp3");
     space_sound = Mix_LoadWAV("sounds/space_sound.mp3");
     fire = Mix_LoadWAV("sounds/fire.mp3");
+    side_engine = Mix_LoadWAV("sounds/side_engines.mp3");
 
     vec2d forward = angle_to_vector(player.angle);
     bool gaming = true;
@@ -335,6 +341,8 @@ void play_the_game(SDL_Renderer *renderer){
 
 
         if(!menu) {
+            left = 0;
+            right = 0;
 
             font = TTF_OpenFont("font/PixelIntv.ttf", 40);
 
@@ -366,13 +374,21 @@ void play_the_game(SDL_Renderer *renderer){
             }
 
 
-
             //kolizje pocisku
             if(fly) bullet_colision(bullet, player);
 
             //skręcanie
-            if (keyboard_state[SDL_SCANCODE_LEFT]) player.angle -= M_PI / 75.0;
-            if (keyboard_state[SDL_SCANCODE_RIGHT]) player.angle += M_PI / 75.0;
+            if (keyboard_state[SDL_SCANCODE_LEFT]) {
+                player.angle -= M_PI / 75.0;
+                right = 1;
+                Mix_PlayChannel(-1, side_engine, 0);
+            }
+            if (keyboard_state[SDL_SCANCODE_RIGHT]) {
+                player.angle += M_PI / 75.0;
+                left = 1;
+                Mix_PlayChannel(-1, side_engine, 0);
+
+            }
 
             //odpalenie silnika
             if (keyboard_state[SDL_SCANCODE_UP] && fire_time == 0) {
@@ -464,6 +480,20 @@ void play_the_game(SDL_Renderer *renderer){
                                      nullptr, &p_rect, 180 * player.angle / M_PI,
                                      nullptr, SDL_FLIP_NONE);
                     fire_time--;
+
+                }
+
+                if (left == 1){
+                    SDL_RenderCopyEx(renderer, fire_left.get(),
+                                     nullptr, &p_rect, 180 * player.angle / M_PI,
+                                     nullptr, SDL_FLIP_NONE);
+
+                }
+
+                if (right == 1){
+                    SDL_RenderCopyEx(renderer, fire_right.get(),
+                                     nullptr, &p_rect, 180 * player.angle / M_PI,
+                                     nullptr, SDL_FLIP_NONE);
 
                 }
 
