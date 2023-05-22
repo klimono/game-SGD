@@ -8,7 +8,6 @@
 #include <cmath>
 #include <string>
 
-
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 800;
 bool menu = true;
@@ -17,6 +16,7 @@ bool game_over = false;
 bool fly = false;
 bool left = false;
 bool right = false;
+bool PDK = 1;
 int score = 0;
 int fire_time = 0;
 TTF_Font* font;
@@ -27,7 +27,6 @@ Mix_Chunk* shoot;
 Mix_Chunk* space_sound;
 Mix_Chunk* fire;
 Mix_Chunk* side_engine;
-
 
 std::shared_ptr<SDL_Texture> load_texture(SDL_Renderer *renderer, std::string fname) {
     SDL_Surface *bmp = SDL_LoadBMP(("images/" + fname).c_str());
@@ -43,7 +42,7 @@ std::shared_ptr<SDL_Texture> load_texture(SDL_Renderer *renderer, std::string fn
     }
     SDL_FreeSurface(bmp);
     return std::shared_ptr<SDL_Texture>(texture, [](SDL_Texture *tex) {
-        std::cout << "Texture destroyed!" << std::endl;
+        //std::cout << "Texture destroyed!" << std::endl;
         SDL_DestroyTexture(tex);
     });
 }
@@ -138,7 +137,7 @@ vec2d asteroid_spawn_XY (){
 
     coos[0] = random(-800, 60);
     coos[1] = random(0, 3);
-    std::cout<<coos[0]<<" "<<coos[1]<<"\n";
+    //std::cout<<coos[0]<<" "<<coos[1]<<"\n";
     return coos;
 }
 
@@ -176,7 +175,7 @@ double asteroid_angle_set(asteroid_c asteroid){
 }
 
 void asteroidDESTROY(asteroid_c &asteroid){
-    std::cout<<"HIT"<<"\n";
+    //std::cout<<"HIT"<<"\n";
     score++;
     //wybuchy
     //dźwięki
@@ -208,7 +207,7 @@ void asteroid_reset(asteroid_c &asteroid){
 void asteroid_collision(asteroid_c &asteroid, bullet_c &bullet,SDL_Rect &a_rect, SDL_Rect &b_rect, player_c &player){
     if((asteroid.position[0] > 120 || asteroid.position[1] > 120) ||
        (asteroid.position[0] < -900 || asteroid.position[1] < -900)){
-        std::cout<<"POZA"<<"\n";
+        //std::cout<<"POZA"<<"\n";
         asteroid_reset(asteroid);
     }
     if(SDL_HasIntersection(&a_rect, &b_rect)){
@@ -220,17 +219,20 @@ void asteroid_collision(asteroid_c &asteroid, bullet_c &bullet,SDL_Rect &a_rect,
 void gameOVER(asteroid_c &asteroid1){
     game_over = true;
     asteroid_reset(asteroid1);
-    Mix_PlayChannel(-1, player_explosion, 0);
+
 }
 
 
 void player_collision(SDL_Rect &a_rect, SDL_Rect &p_rect, asteroid_c asteroid){
-    if(SDL_HasIntersection(&a_rect, &p_rect))
-        gameOVER(asteroid);;
+    if(SDL_HasIntersection(&a_rect, &p_rect)) {
+        gameOVER(asteroid);
+        if(PDK) Mix_PlayChannel(-1, player_explosion, 0);
+        PDK = 0;
+    }
 }
 
 void playerFLY(player_c &player, vec2d forward){
-    player.position = player.position - forward/2;
+    player.position = player.position - forward/1;
 }
 
 void player_abroad(player_c &player){
@@ -284,12 +286,13 @@ void play_the_game(SDL_Renderer *renderer){
     //inicjacja gracza
     player_c player = {M_PI*1.5,{-352,-352}};
 
-
     //inicjacja asteroid
     int asteroid_count = 4;
     asteroid_c asteroid[4];
     for (int i = 0; i < asteroid_count; i++){
-        asteroid[i] = {0,asteroid_spawn()};
+        auto position = asteroid_spawn();
+        asteroid[i] = {0,position};
+        asteroid_angle(asteroid[i]);
     }
 
     //inicjacja pocisku
@@ -303,7 +306,6 @@ void play_the_game(SDL_Renderer *renderer){
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
 
     //ładowanie dźwięków
-
     asteroid_explosion = Mix_LoadWAV("sounds/asteroid_explosion.mp3");
     player_explosion = Mix_LoadWAV("sounds/player_explosion.mp3");
     shoot = Mix_LoadWAV("sounds/shoot.mp3");
@@ -338,7 +340,6 @@ void play_the_game(SDL_Renderer *renderer){
             SDL_RenderCopy(renderer, menu_texture.get(), nullptr, nullptr);
 
         }
-
 
         if(!menu) {
             left = 0;
@@ -381,12 +382,12 @@ void play_the_game(SDL_Renderer *renderer){
             if (keyboard_state[SDL_SCANCODE_LEFT]) {
                 player.angle -= M_PI / 75.0;
                 right = 1;
-                Mix_PlayChannel(-1, side_engine, 0);
+                //Mix_PlayChannel(-1, side_engine, 0);
             }
             if (keyboard_state[SDL_SCANCODE_RIGHT]) {
                 player.angle += M_PI / 75.0;
                 left = 1;
-                Mix_PlayChannel(-1, side_engine, 0);
+                //Mix_PlayChannel(-1, side_engine, 0);
 
             }
 
